@@ -5,10 +5,7 @@ import { signToken } from '../../utils/jwt.js';
 
 const User = db.orm.public.User;
 
-/**
- * Register a new user.
- * Hashes the password, creates the user in DB, and returns a JWT.
- */
+
 export const signup = async ({ name, email, password }) => {
   // Check if user already exists
   const existingUser = await User.where({ email }).first();
