@@ -2,10 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import routes from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
-// ─── Global Middleware ──────────────────────────────
+app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -18,10 +19,10 @@ app.get('/', (req, res) => {
   });
 });
 
-// ─── API Routes ─────────────────────────────────────
+
 app.use('/api', routes);
 
-// ─── 404 Catch-all ─────────────────────────────────
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -30,7 +31,7 @@ app.use((req, res) => {
   });
 });
 
-// ─── Central Error Handler (must be last) ───────────
+
 app.use(errorHandler);
 
 export default app;

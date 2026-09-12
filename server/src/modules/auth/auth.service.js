@@ -1,75 +1,124 @@
 import bcrypt from 'bcryptjs';
 import { db } from '../../config/db.js';
 import ApiError from '../../utils/ApiError.js';
-import { signToken } from '../../utils/jwt.js';
+import {
+  signAccessToken,
+  generateRefreshToken,
+  getRefreshTokenExpiry,
+  hashToken,
+} from '../../utils/jwt.js';
 
 const User = db.orm.public.User;
+const RefreshToken = db.orm.public.RefreshToken;
 
 
-export const signup = async ({ name, email, password }) => {
-  // Check if user already exists
+const generateTokenPair = async (user, meta = {}) => {
+  const accessToken = signAccessToken(user);
+  const { raw: refreshToken, hash: tokenHash } = generateRefreshToken();
+
+  
+  await RefreshToken.create({
+    tokenHash,
+    userId: user.id,
+    expiresAt: getRefreshTokenExpiry().toISOString(),
+    userAgent: meta.userAgent || null,
+    ipAddress: meta.ipAddress || null,
+  });
+
+  return { accessToken, refreshToken };
+};
+
+const sanitizeUser = (user) => {
+  const { passwordHash, ...safe } = user;
+  return safe;
+};
+
+
+export const signup = async ({ name, email, password }, meta = {}) => {
   const existingUser = await User.where({ email }).first();
-
   if (existingUser) {
     throw new ApiError(409, 'A user with this email already exists.');
   }
 
-  // Hash password
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);
-
-  // Create user
   const user = await User.create({ name, email, passwordHash });
 
-  // Generate JWT
-  const token = signToken(user);
-
-  // Return user without passwordHash
-  const { passwordHash: _, ...userWithoutPassword } = user;
-
-  return { user: userWithoutPassword, token };
-};
-
-/**
- * Authenticate an existing user.
- * Validates credentials and returns a JWT.
- */
-export const login = async ({ email, password }) => {
-  // Find user by email
-  const user = await User.where({ email }).first();
+  const { accessToken, refreshToken } = await generateTokenPair(user, meta);
   
-  if (!user) {
-    throw new ApiError(401, 'Invalid email or password.');
-  }
+  return { user: sanitizeUser(user), accessToken, refreshToken };
+};
 
-  // Compare password
+export const login = async ({ email, password }, meta = {}) => {
+  const user = await User.where({ email }).first();
+  if (!user) throw new ApiError(401, 'Invalid email or password.');
+
   const isMatch = await bcrypt.compare(password, user.passwordHash);
+  if (!isMatch) throw new ApiError(401, 'Invalid email or password.');
 
-  if (!isMatch) {
-    throw new ApiError(401, 'Invalid email or password.');
+  const { accessToken, refreshToken } = await generateTokenPair(user, meta);
+
+  return { user: sanitizeUser(user), accessToken, refreshToken };
+};
+
+
+export const refreshTokens = async (oldRawToken, meta = {}) => {
+  if (!oldRawToken) {
+    throw new ApiError(401, 'Refresh token is required.');
   }
 
-  // Generate JWT
-  const token = signToken(user);
+  const oldHash = hashToken(oldRawToken);
 
-  // Return user without passwordHash
-  const { passwordHash: _, ...userWithoutPassword } = user;
 
-  return { user: userWithoutPassword, token };
+  const storedToken = await RefreshToken.where({ tokenHash: oldHash }).first();
+
+  if (!storedToken) {
+    throw new ApiError(403, 'Refresh token reuse detected. Please log in again.');
+  }
+
+  // Check expiration
+  if (new Date(storedToken.expiresAt) < new Date()) {
+    
+    await RefreshToken.where({ id: storedToken.id }).delete();
+    throw new ApiError(401, 'Refresh token has expired. Please log in again.');
+  }
+
+  await RefreshToken.where({ id: storedToken.id }).delete();
+  const user = await User
+    .select('id', 'name', 'email', 'createdAt', 'updatedAt')
+    .where({ id: storedToken.userId })
+    .first();
+
+  if (!user) {
+    throw new ApiError(401, 'User no longer exists.');
+  }
+
+  const { accessToken, refreshToken } = await generateTokenPair(user, meta);
+
+  return { user, accessToken, refreshToken };
 };
 
 /**
- * Get current user profile (already authenticated via middleware).
+ * Logout: revoke the specific refresh token.
  */
+export const logout = async (rawToken) => {
+  if (!rawToken) return;
+
+  const tokenHash = hashToken(rawToken);
+  await RefreshToken.where({ tokenHash }).delete();
+};
+
+
+export const logoutAll = async (userId) => {
+  await RefreshToken.where({ userId }).delete();
+};
+
 export const getProfile = async (userId) => {
   const user = await User
     .select('id', 'name', 'email', 'createdAt', 'updatedAt')
     .where({ id: userId })
     .first();
 
-  if (!user) {
-    throw new ApiError(404, 'User not found.');
-  }
-
+  if (!user) throw new ApiError(404, 'User not found.');
   return user;
 };

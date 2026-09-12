@@ -10,3 +10,16 @@ model User {
 
   @@map("users")
 }
+
+model RefreshToken {
+  id          String              @id @default(uuid())
+  tokenHash   String              @unique          // SHA-256 hash of the actual token
+  userId      String                                // FK to users.id
+  expiresAt   TimestamptzString                     // When this refresh token expires
+  userAgent   String?                               // Browser/device info (for "active sessions" UI)
+  ipAddress   String?                               // IP for audit trail
+  createdAt   TimestamptzString   @default(now())
+  @@index([userId])                                 // Fast lookup: "all tokens for user X"
+  @@index([expiresAt])                              // Fast cleanup of expired tokens
+  @@map("refresh_tokens")
+}
