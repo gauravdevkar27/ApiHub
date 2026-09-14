@@ -1,25 +1,78 @@
-// use prisma-next
-
 model User {
-  id           String              @id @default(uuid())
-  name         String
-  email        String              @unique
-  passwordHash String
-  createdAt    TimestamptzString   @default(now())
-  updatedAt    temporal.updatedAtString()
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  updatedAt     temporal.updatedAt()
+
+  refreshTokens RefreshToken[]
+  collections   Collection[]
+  requests      Request[]
 
   @@map("users")
 }
 
 model RefreshToken {
-  id          String              @id @default(uuid())
-  tokenHash   String              @unique          // SHA-256 hash of the actual token
-  userId      String                                // FK to users.id
-  expiresAt   TimestamptzString                     // When this refresh token expires
-  userAgent   String?                               // Browser/device info (for "active sessions" UI)
-  ipAddress   String?                               // IP for audit trail
-  createdAt   TimestamptzString   @default(now())
-  @@index([userId])                                 // Fast lookup: "all tokens for user X"
-  @@index([expiresAt])                              // Fast cleanup of expired tokens
+  id         String   @id @default(uuid())
+  tokenHash  String   @unique
+  userId     String
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt  DateTime
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+
   @@map("refresh_tokens")
+}
+
+model Collection {
+  id        String       @id @default(uuid())
+  name      String
+  ownerId   String
+
+  owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  parentId  String?
+  parent    Collection?  @relation("CollectionTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Collection[] @relation("CollectionTree")
+
+  requests  Request[]
+
+  position  Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([ownerId, parentId])
+
+  @@map("collections")
+}
+
+model Request {
+  id           String     @id @default(uuid())
+  name         String
+
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  ownerId      String
+  owner        User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  method       String     @default("GET")
+  url          String     @default("")
+  headers      String?
+  body         String?
+
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    temporal.updatedAt()
+  
+  @@index([collectionId, ownerId])
+
+  @@map("requests")
 }

@@ -40,9 +40,8 @@ export const hashToken = (token) => {
  * Calculate refresh token expiry date.
  */
 export const getRefreshTokenExpiry = () => {
-  const expiry = new Date();
-  expiry.setDate(expiry.getDate() + REFRESH_TOKEN_EXPIRES_DAYS);
-  return expiry;
+  const ms = Date.now() + REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60 * 1000;
+  return Temporal.Instant.fromEpochMilliseconds(ms);
 };
 export const signToken = signAccessToken;
 export const verifyToken = verifyAccessToken;

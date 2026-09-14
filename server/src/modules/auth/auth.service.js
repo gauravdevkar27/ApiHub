@@ -20,7 +20,7 @@ const generateTokenPair = async (user, meta = {}) => {
   await RefreshToken.create({
     tokenHash,
     userId: user.id,
-    expiresAt: getRefreshTokenExpiry().toISOString(),
+    expiresAt: getRefreshTokenExpiry(),
     userAgent: meta.userAgent || null,
     ipAddress: meta.ipAddress || null,
   });
@@ -77,7 +77,7 @@ export const refreshTokens = async (oldRawToken, meta = {}) => {
   }
 
   // Check expiration
-  if (new Date(storedToken.expiresAt) < new Date()) {
+  if (Temporal.Instant.compare(storedToken.expiresAt, Temporal.Now.instant()) < 0) {
     
     await RefreshToken.where({ id: storedToken.id }).delete();
     throw new ApiError(401, 'Refresh token has expired. Please log in again.');
