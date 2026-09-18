@@ -204,10 +204,8 @@ export const deleteCollection = async (ownerId, collectionId) => {
   }
 
   const descendantIds = await collectDescendantIds(collectionId, ownerId);
-  console.log("descendants: ", descendantIds);
   const allCollectionIds = [collectionId, ...descendantIds];
-  console.log("allcollectionIds: ", allCollectionIds);
-
+  
   await db.transaction(async (tx) => {
     //delete all requests
     for (const colId of allCollectionIds) {
