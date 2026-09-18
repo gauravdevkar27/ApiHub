@@ -41,7 +41,7 @@ const collectDescendantIds = async (collectionId, ownerId) => {
     .select('id')
     .where({ ownerId, parentId: collectionId })
     .all();
-
+  console.log("Children: ", children);
   for (const child of children) {
     ids.push(child.id);
     const grandchildIds = await collectDescendantIds(child.id, ownerId);
@@ -164,19 +164,15 @@ export const updateCollection = async (ownerId, collectionId, data) => {
   if (data.parentId !== undefined) {
     const newParentId = data.parentId;
 
-    // Can't parent to self
     if (newParentId === collectionId) {
       throw new ApiError(400, 'A collection cannot be its own parent.');
     }
-
-    // If setting a parent (not moving to root), verify it exists and check cycles
     if (newParentId !== null) {
       const newParent = await Collection.where({ id: newParentId, ownerId }).first();
       if (!newParent) {
         throw new ApiError(404, 'Target parent collection not found.');
       }
 
-      // Cycle detection: walk up from newParentId, if we find collectionId → cycle
       const hasCycle = await wouldCreateCycle(collectionId, newParentId, ownerId);
       if (hasCycle) {
         throw new ApiError(400, 'Cannot move a collection into its own descendant.');
@@ -184,7 +180,6 @@ export const updateCollection = async (ownerId, collectionId, data) => {
     }
   }
 
-  // Build update payload — only include fields that were provided
   const updatePayload = {};
   if (data.name !== undefined) updatePayload.name = data.name;
   if (data.parentId !== undefined) updatePayload.parentId = data.parentId;
@@ -201,31 +196,33 @@ export const updateCollection = async (ownerId, collectionId, data) => {
   return updated[0];
 };
 
-/**
- * Delete a collection and cascade to all descendants + their requests.
- */
+
 export const deleteCollection = async (ownerId, collectionId) => {
   const collection = await Collection.where({ id: collectionId, ownerId }).first();
   if (!collection) {
     throw new ApiError(404, 'Collection not found.');
   }
 
-  // Collect all descendant IDs (recursive)
   const descendantIds = await collectDescendantIds(collectionId, ownerId);
+  console.log("descendants: ", descendantIds);
   const allCollectionIds = [collectionId, ...descendantIds];
+  console.log("allcollectionIds: ", allCollectionIds);
 
-  // Delete all requests in all affected collections
-  for (const colId of allCollectionIds) {
-    await Request.where({ collectionId: colId, ownerId }).delete();
-  }
+  await db.transaction(async (tx) => {
+    //delete all requests
+    for (const colId of allCollectionIds) {
+      await tx.orm.public.Request.where({ collectionId: colId, ownerId }).delete();
+    }
+    //delete all collections inside the parent collection
+    for (const descId of descendantIds.reverse()) {
+      await tx.orm.public.Collection.where({ id: descId, ownerId }).delete();
+    }
 
-  // Delete collections bottom-up (descendants first, then the target)
-  for (const descId of descendantIds.reverse()) {
-    await Collection.where({ id: descId, ownerId }).delete();
-  }
+    //delete target collection itself
+    await tx.orm.public.Collection.where({ id: collectionId, ownerId }).delete();
 
-  // Finally delete the target collection
-  await Collection.where({ id: collectionId, ownerId }).delete();
+  });
+
 
   return { message: 'Collection deleted successfully.' };
 };

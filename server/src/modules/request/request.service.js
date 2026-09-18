@@ -4,11 +4,6 @@ import ApiError from '../../utils/ApiError.js';
 const Collection = db.orm.public.Collection;
 const Request = db.orm.public.Request;
 
-// ─── Helpers ────────────────────────────────────────────────────
-
-/**
- * Auto-assign position to the end of siblings if not provided.
- */
 const getNextPosition = async (collectionId, ownerId) => {
   const siblings = await Request
     .select('position')
@@ -21,19 +16,14 @@ const getNextPosition = async (collectionId, ownerId) => {
   return siblings[0].position + 1;
 };
 
-// ─── CRUD ───────────────────────────────────────────────────────
 
-/**
- * Create a new request inside a collection.
- */
 export const createRequest = async (ownerId, collectionId, data) => {
-  // Verify the collection exists and belongs to this user
+ 
   const collection = await Collection.where({ id: collectionId, ownerId }).first();
   if (!collection) {
     throw new ApiError(404, 'Collection not found.');
   }
 
-  // Auto-assign position if not provided
   let position = data.position;
   if (position === undefined || position === null) {
     position = await getNextPosition(collectionId, ownerId);
@@ -53,11 +43,9 @@ export const createRequest = async (ownerId, collectionId, data) => {
   return request;
 };
 
-/**
- * List requests in a collection (paginated).
- */
+
 export const listRequests = async (ownerId, collectionId, { page = 1, limit = 20 }) => {
-  // Verify the collection exists and belongs to this user
+ 
   const collection = await Collection.where({ id: collectionId, ownerId }).first();
   if (!collection) {
     throw new ApiError(404, 'Collection not found.');
@@ -93,9 +81,7 @@ export const listRequests = async (ownerId, collectionId, { page = 1, limit = 20
   };
 };
 
-/**
- * Get a single request by ID.
- */
+
 export const getRequestById = async (ownerId, requestId) => {
   const request = await Request.where({ id: requestId, ownerId }).first();
 
@@ -106,16 +92,14 @@ export const getRequestById = async (ownerId, requestId) => {
   return request;
 };
 
-/**
- * Update a request.
- */
+
 export const updateRequest = async (ownerId, requestId, data) => {
   const request = await Request.where({ id: requestId, ownerId }).first();
   if (!request) {
     throw new ApiError(404, 'Request not found.');
   }
 
-  // Build update payload — only include fields that were provided
+  
   const updatePayload = {};
   if (data.name !== undefined) updatePayload.name = data.name;
   if (data.method !== undefined) updatePayload.method = data.method;
@@ -135,9 +119,7 @@ export const updateRequest = async (ownerId, requestId, data) => {
   return updated[0];
 };
 
-/**
- * Delete a request.
- */
+
 export const deleteRequest = async (ownerId, requestId) => {
   const request = await Request.where({ id: requestId, ownerId }).first();
   if (!request) {

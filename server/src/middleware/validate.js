@@ -9,7 +9,7 @@ import ApiError from '../utils/ApiError.js';
  */
 const validate = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);
-  console.log("Result: ",result);
+  
   if (!result.success) {
     const errors = result.error.errors.map((err) => ({
       field: err.path.join('.'),
