@@ -102,9 +102,7 @@ export const logoutAllHandler = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, 'Logged out from all devices.'));
 });
 
-/**
- * GET /api/v1/auth/me
- */
+
 export const getMe = asyncHandler(async (req, res) => {
   const user = await authService.getProfile(req.user.id);
   res.status(200).json(new ApiResponse(200, { user }, 'Profile fetched successfully.'));

@@ -56,6 +56,7 @@ export const createCollection = async (ownerId, { name, parentId, position }) =>
   // If parentId provided, verify it exists and belongs to this user
   if (parentId) {
     const parent = await Collection.where({ id: parentId, ownerId }).first();
+    console.log(parent);
     if (!parent) {
       throw new ApiError(404, 'Parent collection not found.');
     }
