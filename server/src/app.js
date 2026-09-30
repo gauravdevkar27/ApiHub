@@ -7,11 +7,13 @@ import cookieParser from 'cookie-parser';
 const app = express();
 
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ─── Health Check ───────────────────────────────────
 app.get('/', (req, res) => {
   res.status(200).json({
     status: 'success',

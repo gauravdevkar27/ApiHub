@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════════════════════
+   Workspace Page Styles
+   ═══════════════════════════════════════════════════════════ */
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+
+.workspace__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 var(--space-lg);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+  z-index: var(--z-sticky);
+}
+
+.workspace__topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.workspace__topbar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+  border-radius: var(--radius-sm);
+}
+
+.workspace__topbar-logo svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+.workspace__topbar-title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.workspace__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.workspace__user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.workspace__user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.workspace__user-name {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.workspace__logout-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.workspace__logout-btn:hover {
+  color: var(--color-error);
+  background: rgba(255, 82, 82, 0.08);
+}
+
+.workspace__logout-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Main content area ───────────────────────────────────── */
+
+.workspace__main {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Panel styling ───────────────────────────────────────── */
+
+.workspace__panel {
+  overflow: hidden;
+}
+
+/* ── Resize handles ──────────────────────────────────────── */
+
+.workspace__resize-handle {
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+.workspace__resize-handle--vertical {
+  width: 4px;
+  background: var(--border-primary);
+  cursor: col-resize;
+}
+
+.workspace__resize-handle--vertical:hover,
+.workspace__resize-handle--vertical[data-resize-handle-active] {
+  background: var(--accent-primary);
+}
+
+.workspace__resize-handle--horizontal {
+  height: 4px;
+  background: var(--border-primary);
+  cursor: row-resize;
+}
+
+.workspace__resize-handle--horizontal:hover,
+.workspace__resize-handle--horizontal[data-resize-handle-active] {
+  background: var(--accent-primary);
+}
+
+/* Subtle glow effect on active resize */
+.workspace__resize-handle--vertical[data-resize-handle-active] {
+  box-shadow: 0 0 8px rgba(255, 108, 55, 0.3);
+}
+
+.workspace__resize-handle--horizontal[data-resize-handle-active] {
+  box-shadow: 0 0 8px rgba(255, 108, 55, 0.3);
+}

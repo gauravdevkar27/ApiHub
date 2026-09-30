@@ -3,9 +3,9 @@ import ApiResponse from '../../utils/ApiResponse.js';
 import * as executeService from './execute.service.js';
 
 export const executeRequest = asyncHandler(async (req, res) => {
-  const { url } = req.body;
+  const { method, url, headers, body } = req.body;
 
-  const result = await executeService.executeGetRequest(url);
+  const result = await executeService.executeRequest({ method, url, headers, body });
 
   res
     .status(200)

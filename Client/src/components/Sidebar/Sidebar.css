@@ -1,0 +1,360 @@
+/* ═══════════════════════════════════════════════════════════
+   Sidebar Styles
+   ═══════════════════════════════════════════════════════════ */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.sidebar__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sidebar__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.sidebar__add-btn:hover {
+  color: var(--accent-primary);
+  background: var(--accent-subtle);
+}
+
+.sidebar__add-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── New collection form ─────────────────────────────────── */
+
+.sidebar__new-form {
+  padding: var(--space-xs) var(--space-lg);
+  flex-shrink: 0;
+}
+
+.sidebar__new-input {
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  outline: none;
+}
+
+/* ── Tree container ──────────────────────────────────────── */
+
+.sidebar__tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-xs) 0;
+}
+
+/* ── Loading skeleton ────────────────────────────────────── */
+
+.sidebar__loading {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sidebar__skeleton {
+  height: 28px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.sidebar__skeleton:nth-child(2) { width: 80%; }
+.sidebar__skeleton:nth-child(3) { width: 60%; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.sidebar__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+}
+
+.sidebar__empty-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--text-tertiary);
+}
+
+.sidebar__empty p {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.sidebar__empty-btn {
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.sidebar__empty-btn:hover {
+  background: var(--accent-subtle);
+}
+
+/* ── Collection node row ─────────────────────────────────── */
+
+.sidebar__node-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: 30px;
+  padding-right: var(--space-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.sidebar__node-row:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar__node-row:hover .sidebar__node-actions {
+  opacity: 1;
+}
+
+/* ── Chevron ─────────────────────────────────────────────── */
+
+.sidebar__chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.sidebar__chevron svg {
+  width: 12px;
+  height: 12px;
+}
+
+.sidebar__chevron[data-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+/* ── Folder icon + name ──────────────────────────────────── */
+
+.sidebar__folder-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--accent-primary);
+  display: inline;
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+.sidebar__node-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar__count {
+  margin-left: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  line-height: 1.6;
+}
+
+/* ── Rename input ────────────────────────────────────────── */
+
+.sidebar__rename-input {
+  flex: 1;
+  padding: 1px var(--space-xs);
+  background: var(--bg-input);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+/* ── Node actions (three dots) ───────────────────────────── */
+
+.sidebar__node-actions {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  position: relative;
+}
+
+.sidebar__menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.sidebar__menu-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-active);
+}
+
+.sidebar__menu-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Context menu ────────────────────────────────────────── */
+
+.sidebar__context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 180px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xs) 0;
+  z-index: var(--z-dropdown);
+  animation: fadeIn 100ms ease;
+}
+
+.sidebar__context-menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.sidebar__context-menu button:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar__context-menu button svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.sidebar__menu-divider {
+  height: 1px;
+  background: var(--border-primary);
+  margin: var(--space-xs) 0;
+}
+
+.sidebar__menu-danger {
+  color: var(--color-error) !important;
+}
+
+.sidebar__menu-danger svg {
+  color: var(--color-error) !important;
+}
+
+/* ── Request row ─────────────────────────────────────────── */
+
+.sidebar__request-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 28px;
+  padding-right: var(--space-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sidebar__request-row:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar__request-row--active {
+  background: var(--accent-subtle) !important;
+}
+
+.sidebar__method-badge {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+}
+
+.sidebar__request-name {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Empty folder message ────────────────────────────────── */
+
+.sidebar__empty-folder {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  padding: var(--space-xs) 0;
+  font-style: italic;
+}
+
+/* ── Children container ──────────────────────────────────── */
+
+.sidebar__children {
+  animation: slideInLeft 150ms ease;
+}
