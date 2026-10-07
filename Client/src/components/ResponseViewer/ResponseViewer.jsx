@@ -24,6 +24,7 @@ const ResponseViewer = () => {
 
   const formattedBody = useMemo(() => {
     if (!response?.body) return '';
+    if(response.bodyEncoding === 'base64') return '';
     if (!prettyPrint) return response.body;
 
     try {
@@ -36,6 +37,7 @@ const ResponseViewer = () => {
 
   const bodyLanguage = useMemo(() => {
     if (!response?.body) return 'plaintext';
+    if(response.bodyEncoding === 'base64') return 'plaintext';
     const ct = response.headers?.['content-type'] || '';
     if (ct.includes('json')) return 'json';
     if (ct.includes('html')) return 'html';
@@ -140,17 +142,15 @@ const ResponseViewer = () => {
       {/* ── Tabs ────────────────────────────────────────────── */}
       <div className="response-viewer__tabs">
         <button
-          className={`response-viewer__tab ${
-            activeTab === 'body' ? 'response-viewer__tab--active' : ''
-          }`}
+          className={`response-viewer__tab ${activeTab === 'body' ? 'response-viewer__tab--active' : ''
+            }`}
           onClick={() => setActiveTab('body')}
         >
           Body
         </button>
         <button
-          className={`response-viewer__tab ${
-            activeTab === 'headers' ? 'response-viewer__tab--active' : ''
-          }`}
+          className={`response-viewer__tab ${activeTab === 'headers' ? 'response-viewer__tab--active' : ''
+            }`}
           onClick={() => setActiveTab('headers')}
         >
           Headers
@@ -161,9 +161,8 @@ const ResponseViewer = () => {
           )}
         </button>
         <button
-          className={`response-viewer__tab ${
-            activeTab === 'cookies' ? 'response-viewer__tab--active' : ''
-          }`}
+          className={`response-viewer__tab ${activeTab === 'cookies' ? 'response-viewer__tab--active' : ''
+            }`}
           onClick={() => setActiveTab('cookies')}
         >
           Cookies
@@ -178,17 +177,15 @@ const ResponseViewer = () => {
         {activeTab === 'body' && (
           <div className="response-viewer__toggle">
             <button
-              className={`response-viewer__toggle-btn ${
-                prettyPrint ? 'response-viewer__toggle-btn--active' : ''
-              }`}
+              className={`response-viewer__toggle-btn ${prettyPrint ? 'response-viewer__toggle-btn--active' : ''
+                }`}
               onClick={() => setPrettyPrint(true)}
             >
               Pretty
             </button>
             <button
-              className={`response-viewer__toggle-btn ${
-                !prettyPrint ? 'response-viewer__toggle-btn--active' : ''
-              }`}
+              className={`response-viewer__toggle-btn ${!prettyPrint ? 'response-viewer__toggle-btn--active' : ''
+                }`}
               onClick={() => setPrettyPrint(false)}
             >
               Raw
@@ -201,26 +198,43 @@ const ResponseViewer = () => {
       <div className="response-viewer__content">
         {activeTab === 'body' && (
           <div className="response-viewer__body">
-            <Editor
-              height="100%"
-              language={bodyLanguage}
-              theme="vs-dark"
-              value={formattedBody}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                fontSize: 13,
-                fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                lineNumbers: 'on',
-                renderLineHighlight: 'none',
-                tabSize: 2,
-                automaticLayout: true,
-                padding: { top: 8 },
-                domReadOnly: true,
-              }}
-            />
+            {response.bodyEncoding === 'base64' ? (
+              <div style={{ padding: 16 }}>
+                <p>Binary response ({formatSize(response.responseSizeBytes)}, {response.contentType || 'unknown type'})</p>
+                <a
+                  href={`data:${response.contentType || 'application/octet-stream'};base64,${response.body}`}
+                  download="response.bin"
+                >
+                  Download
+                </a>
+              </div>
+            ) : (
+              <>
+                {response.truncated && (
+                  <div style={{ padding: '4px 12px' }}>Response truncated at 5 MB.</div>
+                )}
+                <Editor
+                  height="100%"
+                  language={bodyLanguage}
+                  theme="vs-dark"
+                  value={formattedBody}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    lineNumbers: 'on',
+                    renderLineHighlight: 'none',
+                    tabSize: 2,
+                    automaticLayout: true,
+                    padding: { top: 8 },
+                    domReadOnly: true,
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
 

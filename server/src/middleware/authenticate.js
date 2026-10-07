@@ -4,12 +4,7 @@ import { db } from '../config/db.js';
 
 const User = db.orm.public.User;
 
-/**
- * JWT authentication middleware.
- * Extracts the token from the Authorization header,
- * verifies it, fetches the user from DB, and attaches
- * the user object (without password) to req.user.
- */
+
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;

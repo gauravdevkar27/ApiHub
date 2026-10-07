@@ -1,5 +1,5 @@
 import ApiError from '../utils/ApiError.js';
-
+import { env } from '../config/env.js';
 /**
  * Central error handling middleware.
  * Catches all errors thrown/forwarded by controllers and middleware,
@@ -25,7 +25,11 @@ const errorHandler = (err, req, res, next) => {
 
   // Log server errors for debugging
   if (statusCode >= 500) {
-    console.error('Server Error:', err);
+    req.log.error({err}, 'Server error');
+
+    if(env.NODE_ENV === 'production' && !(err instanceof ApiError)){
+      message: 'Internal server Error';
+    }
   }
 
   res.status(statusCode).json({
@@ -33,7 +37,8 @@ const errorHandler = (err, req, res, next) => {
     statusCode,
     message,
     errors,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    requestId: req.id,
+    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 
